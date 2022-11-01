@@ -45,13 +45,13 @@ class Minesweeper:
         self.window = window
         self.tiles = [[0 for i in range(self.TILES_X)] for j in range(self.TILES_Y)]
 
-    def draw_board(self): # need to find out when to call, probabily miner.draw_board()
+    def draw_board(self): 
         '''Fills the board with Tiles'''
         for i in range(self.TILES_X):
             for j in range(self.TILES_Y):
                 self.tiles[i][j] = Tile(self.boardf[i][j], self.window, i*30, j*30) #draw a single tile
                 self.tiles[i][j].draw()
-                self.tiles[i][j].display(position=(i*30 + 10, j*30 + 5))
+                #self.tiles[i][j].display(position=(i*30 + 10, j*30 + 5))
 
 
     def is_flag(self,x,y):
@@ -92,6 +92,46 @@ class Minesweeper:
         else:
             return self.is_flag(x-1,y-1) + self.is_flag(x-1, y) + self.is_flag(x-1, y+1) + self.is_flag(x, y-1) + self.is_flag(x,y+1) + self.is_flag(x+1, y-1) + self.is_flag(x+1,y) + self.is_flag(x+1,y+1)
 
+    def handle_click(self, event):
+        pos = pygame.mouse.get_pos()
+        tile = (pos[0] // 30, pos[1] // 30)
+        if event.button == 1: # if left click, get tile position and reveal
+            self.reveal_tile(tile)
+        elif event.button == 3: # if right click, get tile position and reveal
+            self.flag_tile(tile)
+        else:
+            return
+
+    def reveal_tile(self, tile):
+        x,y = tile[0], tile[1]
+        val = self.board[x][y]
+        if val == -1:
+            self.game_over()
+        elif val == 0:
+            self.clear_near_zeros(x,y)
+        else:
+            self.tiles[x][y].display(position=(x*30 + 10, y*30 + 5))
+    
+    def game_over():
+        return 1
+    
+    def clear_near_zeros(self,x,y): # DFS implementation to check all NSEW tiles for zero and clear them
+        # base case, current tile is not a zero tile --> return
+        if self.board[x][y] != 0:
+            return
+        elif x < 0 or x == self.TILES_X or y < 0 or y == self.TILES_Y:
+            return
+        # replace current tile with clear tile
+        else:
+            #insert function to replace tile with clear tile
+            self.clear_near_zeros(x-1,y)
+            self.clear_near_zeros(x+1,y)
+            self.clear_near_zeros(x, y-1)
+            self.clear_near_zeros(x,y+1)
+        
+        
+
+
 def main():
     BLACK = (0, 0, 0)
     WHITE = (200, 200, 200)
@@ -109,9 +149,11 @@ def main():
     for i in range(len(miner.board)):
         print(miner.board[i])
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: 
-                sys.exit()
+        event = pygame.event.poll()
+        if event.type == pygame.QUIT: 
+            sys.exit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            miner.handle_click(event)
 
 
 if __name__ == '__main__':
