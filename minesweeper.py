@@ -41,10 +41,11 @@ class Minesweeper:
     def __init__(self, window):
         print('intializing')
         self.TILES_X, self.TILES_Y = 15, 15
+        self.num_flags = 0
         self.boardf = self.set_flags(self.TILES_X, self.TILES_Y)
         self.window = window
         self.tiles = [[0 for i in range(self.TILES_X)] for j in range(self.TILES_Y)]
-        self.num_flags = 0
+        
 
     def draw_board(self): 
         '''Fills the board with Tiles'''
@@ -68,6 +69,8 @@ class Minesweeper:
             for y in range(y_tiles):
                 if self.board[x][y] != -1:
                     self.board[x][y] = self.near_flag(x,y)
+                    self.num_flags = self.num_flags + 1
+        self.flags_left = self.num_flags
         return self.board
 
     def near_flag(self, x,y):
@@ -105,29 +108,43 @@ class Minesweeper:
                 return
         else:
             return
+    
     def flag_tile(self,x,y):
-        print("Flagging ", x,y)
-        rect = pygame.Rect(x*30,y*30,30,30)
-        pygame.draw.rect(self.window, (255,0,0), rect)
-        self.tiles[x][y].display(position=(x*30 + 10, y*30 + 5))
+        if self.board[x][y] != -2:
+            # replace tile with a flag tile and update number of flags left
+            print("Flagging ", x,y)
+            rect = pygame.Rect(x*30,y*30,30,30)
+            pygame.draw.rect(self.window, (255,0,0), rect)
+            self.tiles[x][y].display(position=(x*30 + 10, y*30 + 5))
+            self.flags_left = self.flags_left - 1
+            if self.flags_left == 0:
+                self.game_won()
         return
 
 
     def reveal_tile(self, x,y):
         val = self.board[x][y]
+        if val == -2:
+            return
         if val == -1:
-            self.game_over()
+            self.game_lost()
         elif val == 0:
             self.clear_near_zeros(x,y)
         else:
             #change color of tile and display number
-            print(x,y)
+            print("Reveal ",x,y)
+            self.board[x][y] = -2
             rect = pygame.Rect(x*30,y*30,30,30)
             pygame.draw.rect(self.window, (200,200,200), rect)
             self.tiles[x][y].display(position=(x*30 + 10, y*30 + 5))
     
-    def game_over(self):
-        return 1
+    def game_lost(self):
+        print("dang you lost the game")
+        sys.exit()
+    
+    def game_won(self):
+        print("didn't think you'd win")
+        sys.exit()
     
     def clear_near_zeros(self,x,y): # DFS implementation to check all NSEW tiles for non-negative tiles and clear them
         # base case, current tile is not a zero tile --> return
