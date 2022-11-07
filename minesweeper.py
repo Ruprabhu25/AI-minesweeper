@@ -147,6 +147,10 @@ class Minesweeper:
             self.clear_near_zeros(x+1,y)
             self.clear_near_zeros(x, y-1)
             self.clear_near_zeros(x,y+1)
+            self.clear_near_zeros(x-1,y-1)
+            self.clear_near_zeros(x+1,y+1)
+            self.clear_near_zeros(x+1, y-1)
+            self.clear_near_zeros(x-1,y+1)
         
         
 
