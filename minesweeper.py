@@ -63,13 +63,16 @@ class Minesweeper:
 
     def set_flags(self, x_tiles, y_tiles):
         # create self.board with 0 or -1 values
-        # -1 values are flags, 0 are safe tiles
+        # -1 values are flags, 0 are safe tiles]
+        tiles = 255
+        non_flags = 0
         self.board = [[(-1 * np.random.choice(a=2, p=[0.85,0.15])) for i in range(x_tiles)] for j in range(y_tiles)]
         for x in range(x_tiles):
             for y in range(y_tiles):
                 if self.board[x][y] != -1:
                     self.board[x][y] = self.near_flag(x,y)
-                    self.num_flags = self.num_flags + 1
+                    non_flags = non_flags + 1
+        self.num_flags = tiles - non_flags
         self.flags_left = self.num_flags
         return self.board
 
@@ -102,7 +105,7 @@ class Minesweeper:
         if self.board[x][y] != -2:
             if event.button == 1 : # if left click, get tile position and reveal
                 self.reveal_tile(x,y)
-            elif event.button == 3: # if right click, get tile position and reveal
+            elif event.button == 3: # if right click, flag the tile
                 self.flag_tile(x,y)
             else:
                 return
@@ -110,13 +113,20 @@ class Minesweeper:
             return
     
     def flag_tile(self,x,y):
-        if self.board[x][y] != -2:
+        if self.board[x][y] < -2: # unflagging a tile
+            rect = pygame.Rect(x*30,y*30,30,30)
+            pygame.draw.rect(self.window, (0,0,0), rect)
+            print(self.board[x][y])
+            self.board[x][y] = self.board[x][y] + 10
+            self.flags_left = self.flags_left + 1
+        elif self.board[x][y] != -2:
             # replace tile with a flag tile and update number of flags left
+            self.board[x][y] = self.board[x][y] - 10 # a flagged tile's value is decreased by 10 to show it is flagged
             print("Flagging ", x,y)
             rect = pygame.Rect(x*30,y*30,30,30)
             pygame.draw.rect(self.window, (255,0,0), rect)
-            self.tiles[x][y].display(position=(x*30 + 10, y*30 + 5))
             self.flags_left = self.flags_left - 1
+            print(self.flags_left)
             if self.flags_left == 0:
                 self.game_won()
         return
@@ -169,9 +179,6 @@ class Minesweeper:
             self.clear_near_zeros(x+1, y-1)
             self.clear_near_zeros(x-1,y+1)
         
-        
-
-
 def main():
     BLACK = (0, 0, 0)
     WHITE = (200, 200, 200)
@@ -201,51 +208,4 @@ def main():
 if __name__ == '__main__':
     main()
 
-
-
-
-'''
-
-
-BLACK = (0, 0, 0)
-WHITE = (200, 200, 200)
-WINDOW_HEIGHT = 400
-WINDOW_WIDTH = 400
-
-def drawGrid():
-    blockSize = 20 # Set the size of the grid block
-    for x in range(0, WINDOW_WIDTH, blockSize):
-        for y in range(0, WINDOW_HEIGHT, blockSize):
-            rect = pygame.Rect(x, y, blockSize, blockSize)
-            pygame.draw.rect(SCREEN, WHITE, rect, 1)
-
-
-        font = pygame.font.SysFont('arial', 50)
-        text = font.render(str(self.value), True, (0, 0, 0))
-        self.window.blit(text, position)  
-
-def set_flags():
-
-
-
-def main():
-    global SCREEN, CLOCK
-    pygame.init()
-    SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    CLOCK = pygame.time.Clock()
-    SCREEN.fill(BLACK)
-
-    while True:
-        drawGrid()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-        pygame.display.update()
-
-if __name__ == "__main__":
-    main()
-
-
-'''
+# player should be able to unflag a tile as well (increment flag counter when doing this)
