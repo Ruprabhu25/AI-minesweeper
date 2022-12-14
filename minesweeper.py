@@ -53,7 +53,6 @@ class Minesweeper:
             for j in range(self.TILES_Y):
                 self.tiles[i][j] = Tile(self.boardf[i][j], self.window, i*30, j*30) #draw a single tile
                 self.tiles[i][j].draw()
-                #self.tiles[i][j].display(position=(i*30 + 10, j*30 + 5))
 
 
     def is_flag(self,x,y):
@@ -207,5 +206,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# player should be able to unflag a tile as well (increment flag counter when doing this)
